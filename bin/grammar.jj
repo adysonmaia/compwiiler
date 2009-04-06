@@ -1,0 +1,198 @@
+options 
+{
+    LOOKAHEAD = 2;
+    STATIC = false;
+}
+
+PARSER_BEGIN(Grammar)
+    public class Grammar {
+        public static void main (String args[]) throws ParseException {
+            Grammar parser = new Grammar(System.in);
+            System.out.println("Reading from standard input...");
+            try {
+                parser.Program();
+                System.out.println("OK.");
+            } catch (Exception e) {
+                System.out.println("NOK.");
+                System.out.println(e.getMessage());
+            }            
+        }
+    }    
+PARSER_END(Grammar)
+
+SKIP :
+{
+    <"//"(["a"-"z"])*> /* comentário de uma linha */
+|   <"/*" (["a"-"z"])* ("\n" | "\r" | "\r\n")* "*/"> /* Comentário multi-linha */
+|   " " /* espaco */
+|   "\t" /* tabulacao */
+|   "\n" /* quebra de linha */
+|   "\r\n" /* retorno de carro com quebra de linha */
+|   "\r"   /* retorno de carro */
+}
+
+
+/* palavras reservadas */
+TOKEN :
+{
+    < T_INT:      "int" >
+|   < T_STRING:   "String" >
+|   < T_BOOLEAN:  "boolean" >
+|   < T_IF:       "if" >
+|   < T_ELSE:     "else" >
+|   < T_WHILE:    "while" >
+|   < T_THIS:     "this" >
+|   < T_NEW:      "new" >
+|   < T_PUBLIC:   "public" >
+|   < T_STATIC:   "static" >
+|   < T_VOID:     "void" >
+|   < T_CLASS:    "class" >
+|   < T_EXTENDS:  "extends" >
+|   < T_RETURN:   "return" >
+|   < T_MAIN:     "main" >
+|   < T_LENGTH:   "length" >
+|   < T_SYSTEM:   "System" >
+|   < T_OUT:      "out" >
+|   < T_PRINTLN:  "println" >
+
+/* Valores para Booleanos */
+
+|   < T_TRUE: "true" >
+|   < T_FALSE: "false" >
+
+/* Operadores */
+
+|   < T_OP_BIN: ( "&&" | "<" | "+" | "-" | "*" ) >
+|   < T_OP_UN: "!" >  
+
+/* caracteres de pontuacao */
+
+|   < T_LPAR:     "(" >
+|   < T_RPAR:     ")" >
+|   < T_LCOL:     "[" >
+|   < T_RCOL:     "]" >
+|   < T_LCHAVE:   "{" >
+|   < T_RCHAVE:   "}" >
+|   < T_PVIRGULA: ";" >
+|   < T_VIRGULA:  "," >
+|   < T_DOT: "." >
+|   < T_ASSIGN: "=" >
+
+/* Identificadores*/
+    
+|   < #DIGIT: ["0"-"9"] >
+|   < T_ID: (["a"-"z"] | ["A"-"Z"]) (["a"-"z"] | ["A"-"Z"] | <DIGIT> | "_")* >
+|   < T_INTEGER_LITERAL: (<DIGIT>)+ >
+}
+
+
+void Program() :
+{}
+{
+    MainClass() ( ClassDecl() )* <EOF>
+}
+
+void MainClass() :
+{}
+{
+    <T_CLASS> <T_ID> "{" 
+        <T_PUBLIC> <T_STATIC> <T_VOID> <T_MAIN> "(" <T_STRING> "[" "]" <T_ID> ")" "{"
+            Statement()
+        "}"
+    "}"
+}
+
+void ClassDecl() :
+{}
+{
+    <T_CLASS> <T_ID> "{" ( VarDecl() )* ( MethodDecl() )* "}"
+|   <T_CLASS> <T_ID> <T_EXTENDS> <T_ID> "{" ( VarDecl() )* ( MethodDecl() )* "}" 
+}
+
+void VarDecl() :
+{}
+{
+    Type() <T_ID> ";"
+}
+
+void MethodDecl() :
+{}
+{
+    <T_PUBLIC> Type() <T_ID> "(" FormalList() ")" "{" 
+        ( VarDecl() )* ( Statement() )* <T_RETURN> Exp() ";" 
+    "}"
+}
+
+void FormalList() :
+{}
+{
+	( Type() <T_ID> ( FormalRest() )* )?
+}
+
+void FormalRest() :
+{}
+{
+	"," Type() <T_ID>
+}
+
+void Type() :
+{}
+{
+    <T_INT> "[" "]"
+|   <T_BOOLEAN>
+|   <T_INT>
+|   <T_ID>
+}
+
+void Statement() :
+{}
+{
+    "{" ( Statement() )* "}"
+|   <T_IF> "(" Exp() ")" Statement() <T_ELSE> Statement()
+|   <T_WHILE> "(" Exp() ")" Statement()
+|   <T_SYSTEM> "." <T_OUT> "." <T_PRINTLN> "(" Exp() ")" ";"
+|   <T_ID> "=" Exp() ";" 
+|   <T_ID> "[" Exp() "]" "=" Exp() ";"
+}
+
+void Exp() :
+{}
+{
+    ExpL() ExpR()
+}
+
+void ExpL() :
+{}
+{
+    <T_INTEGER_LITERAL>
+|   <T_TRUE>
+|   <T_FALSE>
+|   <T_ID>
+|   <T_THIS>
+|   <T_NEW> <T_INT> "[" Exp() "]"
+|   <T_NEW> <T_ID> "(" ")"
+|   <T_OP_UN> Exp()
+|   "(" Exp() ")"
+}
+
+void ExpR() :
+{}
+{
+    (<T_OP_BIN> Exp() ExpR()
+|   "[" Exp() "]" ExpR()
+|   "." <T_LENGTH> ExpR()
+|   "." <T_ID> "(" ExpList() ")" ExpR() )?
+
+}
+
+void ExpList() :
+{}
+{
+    Exp() ( ExpRest() )*
+}
+
+void ExpRest() :
+{}
+{
+    "," Exp()
+}
