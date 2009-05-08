@@ -3,6 +3,10 @@ import visitor.Visitor;
 import visitor.TypeVisitor;
 
 public class BooleanType extends Type {
+  public BooleanType(){
+    this.s="boolean";
+  }
+  
   public void accept(Visitor v) {
     v.visit(this);
   }
