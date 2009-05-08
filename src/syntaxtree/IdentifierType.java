@@ -3,10 +3,8 @@ import visitor.Visitor;
 import visitor.TypeVisitor;
 
 public class IdentifierType extends Type {
-  public String s;
-
   public IdentifierType(String as) {
-    s=as;
+    this.s=as;
   }
 
   public void accept(Visitor v) {
