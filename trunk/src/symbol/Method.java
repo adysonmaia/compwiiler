@@ -1,14 +1,21 @@
 package symbol;
 
 import java.util.ArrayList;
+import frame.Frame;
+import frame.Access;
 
 public class Method {
 	public Binding metbin;
+	public Symbol name;
 	public Parameters params = new Parameters();
 	public Locals locals = new Locals();
 	
+	public Access thisPtr;
+    public Frame frame;
+	
 	public Method(Binding metbin){
 		this.metbin=metbin;
+		this.name = this.metbin.key;
 	}
 	
 	public Object getObjectByKey(String mode, Symbol key){

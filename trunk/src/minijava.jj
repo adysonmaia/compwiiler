@@ -506,8 +506,10 @@ Call MessageSend() :
   ExpList el;
 }
 {
+  (
   e = PrimaryExpression() "." i = Identifier() 
   "(" el = ExpressionList() ")"
+  )
   {return new Call(e,i,el);}
 }
 
@@ -518,7 +520,7 @@ ExpList ExpressionList() :
   Exp e2;
 }
 {
-  ( e = Expression() ( e2 = ExpressionRest() { el.addElement(e2); } )* )?
+  (e = Expression() {el.addElement(e);} ( e2 = ExpressionRest() { el.addElement(e2); } )* )?
   { return el; }
 }
 
