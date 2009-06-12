@@ -19,6 +19,14 @@ public class Class {
 		return null;
 	}
 	
+	public int getFieldOffset(Symbol key){
+		for (int i=0;i<=fields.fieldsL.size()-1;i++){
+			if (fields.fieldsL.get(i).key.equals(key))
+				return i;
+		}
+		return -1;
+	}
+	
 	public Method getMethodByKey(Symbol key){
 		for (int i=0;i<=methods.size()-1;i++){
 			if (methods.get(i).metbin.key.equals(key))

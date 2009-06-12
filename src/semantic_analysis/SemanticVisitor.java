@@ -184,7 +184,7 @@ public class SemanticVisitor implements TypeVisitor {
 		if ((t==null) || (o==null))
 			return null;
 		if (!(t.s.equals(((String)o))))
-			ErrorMsg.complain("Error : Type mismatch: Type mismatch: The right hand side of an assign statement must be of the same type of the left hand side.");
+			ErrorMsg.complain("Error : Type mismatch: The right hand side of an assign statement must be of the same type of the left hand side.");
 		return null;
 	}
 
@@ -324,8 +324,11 @@ public class SemanticVisitor implements TypeVisitor {
 		for (int i=0; i < n.el.size(); i++){
 			Object ob = table.getParamsObjectByIndex(it.s,n.i.s,i);
 			Exp e=n.el.elementAt(i);
-			if (!(e.accept(this).s.equals((String)ob) ))
-				ErrorMsg.complain("Error : Type mismatch: The argument "+(i+1)+" of the method "+n.i.s+" must be of type "+((String)ob)+".");
+			Type te=e.accept(this);
+			if (te!=null) {
+				if (!(te.s.equals((String)ob) ))
+					ErrorMsg.complain("Error : Type mismatch: The argument "+(i+1)+" of the method "+n.i.s+" must be of type "+((String)ob)+".");
+			}
 		}
 		
 		if (((String)o).equals("int"))

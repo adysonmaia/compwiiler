@@ -1,9 +1,11 @@
 package symbol;
 
 import java.util.ArrayList;
+import frame.Access;
 
 public class Parameters {
-	ArrayList <Binding> paramsL = new ArrayList <Binding>(); 
+	public ArrayList <Binding> paramsL = new ArrayList <Binding>(); 
+	public ArrayList <Access> accessL;
 	
 	public int index (Symbol key){
 		for (int i=0;i<=paramsL.size()-1;i++){
