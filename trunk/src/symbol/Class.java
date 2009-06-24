@@ -34,4 +34,12 @@ public class Class {
 		}
 		return null;
 	}
+	
+	public int getMethodOffset(Symbol key){
+		for (int i=0;i<=methods.size()-1;i++){
+			if (methods.get(i).metbin.key.equals(key))
+				return i;
+		}
+		return -1;
+	}
 }
