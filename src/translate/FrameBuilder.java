@@ -31,17 +31,9 @@ public class FrameBuilder implements Visitor {
 	
 	public void visit(Program node)
     {
-	    for ( int i = 0; i < node.cl.size(); i++ ) {
-	    	ClassDecl cd = node.cl.elementAt(i);
-	    	if (cd instanceof ClassDeclSimple) {
-	    		ClassDeclSimple cds = (ClassDeclSimple)cd;
-				cinfo = env.getClassByKey( cds.i.s );
-	    	} else if ( cd instanceof ClassDeclExtends  ) {
-	    		ClassDeclExtends cde = (ClassDeclExtends)cd;
-				cinfo = env.getClassByKey( cde.i.s );
-	    	}
-	    	node.cl.elementAt(i).accept(this);
-	    }
+		node.m.accept(this);
+		for(int i=0;i<=node.cl.size()-1;i++)
+			node.cl.elementAt(i).accept(this);
     }
 	
 	// Identifier i1,i2;
@@ -52,6 +44,7 @@ public class FrameBuilder implements Visitor {
 	
 	public void visit(ClassDeclSimple node)
     {       
+		cinfo = env.getClassByKey( node.i.s );
 		for ( int i = 0; i < node.ml.size(); i++ ) {
 	        node.ml.elementAt(i).accept(this);
 	    }
@@ -59,7 +52,7 @@ public class FrameBuilder implements Visitor {
 	
 	public void visit(ClassDeclExtends node)
     {
-        
+		cinfo = env.getClassByKey( node.i.s );
 		for ( int i = 0; i < node.ml.size(); i++ ) {
 	        node.ml.elementAt(i).accept(this);
 	    }
@@ -86,7 +79,6 @@ public class FrameBuilder implements Visitor {
         
         Frame methodFrame = parent.newFrame(methodName, head);
                 
-        
         // facilitando a vida de muitas partes do compilador
         minfo.frame = methodFrame;
         minfo.thisPtr = methodFrame.formals.head;
@@ -97,12 +89,12 @@ public class FrameBuilder implements Visitor {
         minfo.locals.accessL = new ArrayList <Access> ( minfo.locals.localsL.size() );
         
         for (int i = 0; i < node.fl.size(); i++) {
-			f = f.tail;
         	Formal aux = node.fl.elementAt(i);
         	int index = minfo.params.index( Symbol.symbol( aux.i.s ) );
         	if ( index >= 0) {
-        		minfo.params.accessL.add(index, f.head); 
+        		minfo.params.accessL.set(index, f.head); 
         	}
+        	f = f.tail;
 		}
         
         // criando espaco para as variaveis locais
@@ -115,11 +107,11 @@ public class FrameBuilder implements Visitor {
     {
         int index = minfo.locals.index( Symbol.symbol( node.i.s ));
         if (index >= 0) {
-        	minfo.locals.accessL.add(index, minfo.frame.allocLocal(false));
+        	minfo.locals.accessL.set(index, minfo.frame.allocLocal(false));
         }
     }
 	
-//	 Type t;
+    // Type t;
 	// Identifier i;
 	public void visit(Formal n) {
 		
