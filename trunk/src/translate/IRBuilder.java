@@ -14,6 +14,9 @@ public class IRBuilder implements Visitor {
     
     private symbol.Class cinfo;
     private symbol.Method minfo;
+    
+    private Frag result;
+    private Frag tail;
 
     private IRBuilder(Table e, Frame f)
     {
@@ -21,9 +24,19 @@ public class IRBuilder implements Visitor {
         
         env = e;
         frame = f;
+        
+        result = tail = null;
     }
     
-    static void build(Table e, Program p, Frame f)
+    private void addFrag(Frag f)
+    {
+        if ( result == null )
+            result = tail = f;
+        else
+            tail = tail.next = f;
+    }
+    
+    static Frag build(Table e, Program p, Frame f)
     {
         IRBuilder b = new IRBuilder(e, f);
         
@@ -31,6 +44,7 @@ public class IRBuilder implements Visitor {
         b.frame = f.newFrame(l, null);
         
         p.accept(b);
+        return b.result;
     }
     
 	public void visit(Program node) {
@@ -41,7 +55,9 @@ public class IRBuilder implements Visitor {
 
 	public void visit(MainClass node) {
 		Stm s = StatementHandler.translate(frame, env, null, null, node.s).unNx();
-
+		ProcFrag f = new ProcFrag(s, frame);
+        
+        addFrag(f);
 	}
 
 	public void visit(ClassDeclSimple node) {
@@ -87,6 +103,9 @@ public class IRBuilder implements Visitor {
         
         tree.Exp body = new ESEQ(r.unNx(), v.unEx());
         Stm b = minfo.frame.procEntryExit1(body);
+        
+        ProcFrag f = new ProcFrag(b, minfo.frame);
+        addFrag(f);
 	}
 
 	public void visit(Formal n) {

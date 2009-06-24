@@ -220,18 +220,43 @@ public class ExpHandler implements Visitor {
 
 	}
 
-	public void visit(ArrayLookup n) {
-		// TODO Auto-generated method stub
+	public void visit(ArrayLookup node) {
+		tree.Exp array = ExpHandler.translate(frame, env, cinfo, minfo, node.e1).unEx();
+        tree.Exp index = ExpHandler.translate(frame, env, cinfo, minfo, node.e2).unEx();
+        
+        Temp arrayTemp = new Temp();
+        Temp indexTemp = new Temp();
+        
+        SEQ s = new SEQ(new MOVE(new TEMP(arrayTemp), array), 
+                        new MOVE(new TEMP(indexTemp), index));
+        
+        ESEQ fetch = new ESEQ(s, 
+                     new MEM(new BINOP(BINOP.PLUS, 
+                                       new TEMP(arrayTemp),
+                                       new BINOP(BINOP.TIMES, 
+                                                 new BINOP(BINOP.PLUS, new TEMP(indexTemp), new CONST(1)),
+                                                 new CONST( frame.wordsize() )))));
+        result = new Ex(fetch);
 
 	}
 
-	public void visit(ArrayLength n) {
-		// TODO Auto-generated method stub
+	public void visit(ArrayLength node) {
+		tree.Exp array = ExpHandler.translate(frame, env, cinfo, minfo, node.e).unEx();
+		Temp size = new Temp();
+		Temp arr = new Temp();
+		
+		tree.Stm move = new MOVE(new TEMP(arr), array);
+		tree.Stm s = new MOVE(new TEMP(size),
+                              new BINOP(BINOP.PLUS, new TEMP(arr), new CONST(0)));
+		
+		tree.Stm aux = new SEQ(move, s);
+		tree.Exp fetchSize = new ESEQ(aux, new MEM(new TEMP(size)) );
+		result = new Ex(fetchSize);
 
 	}
 
 	public void visit(Call node) {
-
+		// TODO fazer
 	}
 
 	public void visit(IntegerLiteral node) {
@@ -249,8 +274,12 @@ public class ExpHandler implements Visitor {
 
 	}
 
-	public void visit(IdentifierExp n) {
-		// TODO Auto-generated method stub
+	public void visit(IdentifierExp node) {
+		Symbol name = Symbol.symbol(node.s);
+        
+        tree.Exp fetch = getVariable(name);
+        
+        result = new Ex(fetch);
 
 	}
 
